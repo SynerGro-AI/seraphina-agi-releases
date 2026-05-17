@@ -1,0 +1,27 @@
+# Anything that isn't part of the public release landing page.
+# This repo holds README + LICENSE only. Release artifacts (the .exe)
+# live as GitHub Release assets, NOT in git.
+
+# Never commit the installer payload itself.
+*.exe
+*.zip
+*.msi
+*.iss
+
+# Local notes, drafts, build outputs.
+dist/
+build/
+.notes/
+*.log
+*.tmp
+
+# Editor noise.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets -- defense in depth even though this repo should never see any.
+.env
+.env.*
+!.env.example

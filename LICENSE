@@ -1,0 +1,109 @@
+SERAPHINA AGI -- PROPRIETARY SOFTWARE LICENSE
+Copyright (c) 2026 SynerGro AI Corp. All rights reserved.
+
+1. DEFINITIONS
+
+   "Software" means the Seraphina AGI installer (Seraphina-AGI-Setup.exe)
+   distributed by SynerGro AI Corp via the GitHub repository
+   github.com/synergroaicorp/seraphina-agi-releases, including all files
+   it extracts at install time, and any updates or patches issued by
+   SynerGro AI Corp.
+
+   "You" means the individual or legal entity that downloads, installs,
+   or executes the Software.
+
+2. GRANT OF LICENSE
+
+   Subject to the terms below, SynerGro AI Corp grants You a personal,
+   non-exclusive, non-transferable, revocable license to:
+
+   (a) Download the Software from the official release page.
+   (b) Install and run the Software on hardware that You own or
+       lawfully control.
+   (c) Use the Software for personal or internal business purposes.
+
+3. SUBSCRIPTION-GATED FEATURES
+
+   Some features of the Software require a valid subscription obtained
+   from https://synergroaicorp.com. Those features will refuse to
+   activate without a verified subscription. The base download itself
+   remains free.
+
+4. RESTRICTIONS
+
+   You may NOT, without prior written permission from SynerGro AI Corp:
+
+   (a) Redistribute, resell, sublicense, rent, lease, or host the
+       Software for third parties.
+   (b) Reverse engineer, decompile, disassemble, or otherwise attempt
+       to derive source code, except to the extent such activity is
+       expressly permitted by applicable law notwithstanding this
+       limitation.
+   (c) Modify, port, translate, or create derivative works of the
+       Software.
+   (d) Remove, alter, or obscure copyright notices, trademarks, or
+       license terms.
+   (e) Use the Software to provide a commercial service to third
+       parties (e.g., a hosted "Seraphina-as-a-service" offering).
+   (f) Circumvent subscription, licensing, or telemetry controls.
+
+5. OPEN-SOURCE COMPONENTS
+
+   The Software bundles third-party open-source libraries (Python
+   runtime, Node.js runtime, mining utilities, etc.) under their
+   respective licenses. Those licenses govern only the corresponding
+   components, not the Software as a whole. A NOTICE file enumerating
+   the third-party components and licenses is included in the installed
+   payload.
+
+6. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT,
+   OR ACCURACY. YOU ASSUME ALL RISK OF USE.
+
+7. LIMITATION OF LIABILITY
+
+   TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, SYNERGRO AI CORP
+   SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
+   CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, DATA,
+   GOODWILL, OR HARDWARE, ARISING OUT OF OR RELATED TO YOUR USE OF THE
+   SOFTWARE, EVEN IF SYNERGRO AI CORP HAS BEEN ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGES. SYNERGRO AI CORP'S TOTAL AGGREGATE
+   LIABILITY FOR ALL CLAIMS RELATED TO THE SOFTWARE SHALL NOT EXCEED
+   ONE HUNDRED U.S. DOLLARS (US $100.00) OR THE AMOUNT YOU PAID
+   SYNERGRO AI CORP IN THE TWELVE MONTHS PRECEDING THE CLAIM,
+   WHICHEVER IS GREATER.
+
+8. MINING DISCLOSURE
+
+   The Software includes an optional cryptocurrency mining module. The
+   module is disabled by default and requires explicit user consent
+   before activation. By enabling it You acknowledge that mining
+   consumes electricity, generates heat, may accelerate hardware wear,
+   and that any proceeds are subject to applicable tax law in Your
+   jurisdiction. SynerGro AI Corp makes no representation as to
+   profitability.
+
+9. TERMINATION
+
+   This license terminates automatically if You breach any term. Upon
+   termination You must cease all use of the Software and uninstall it
+   from Your systems. Sections 4, 6, 7, 8, and 10 survive termination.
+
+10. GOVERNING LAW
+
+    This license is governed by the laws of the State of Delaware,
+    United States, without regard to its conflict-of-laws principles.
+    Any dispute arising under this license shall be brought exclusively
+    in the state or federal courts located in Delaware, and You consent
+    to the jurisdiction of those courts.
+
+11. CONTACT
+
+    SynerGro AI Corp
+    https://synergroaicorp.com
+    legal@synergroaicorp.com
+
+END OF LICENSE
