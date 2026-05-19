@@ -1,0 +1,168 @@
+# Public-side triage workflow for SynerGro-AI/seraphina-agi-releases.
+#
+# Behavior:
+#   * On new issue: auto-label by content + post welcome comment with
+#     escalation instructions.
+#   * On `/escalate` slash command (maintainer-only): mirror this issue
+#     into the private source repo SynerGro-AI/seraphina-agi so Copilot
+#     Coding Agent can be assigned there.
+#
+# Required secrets (Settings → Secrets and variables → Actions):
+#   MIRROR_PAT   Fine-grained PAT with `Issues: write` on
+#                SynerGro-AI/seraphina-agi. Used only by the slash handler.
+#                If unset, `/escalate` will fail with a clear comment.
+name: Triage
+
+on:
+  issues:
+    types: [opened, reopened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  # -----------------------------------------------------------------------
+  greet:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-label by content
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const text = ((context.payload.issue.title || '') + '\n' +
+                          (context.payload.issue.body || '')).toLowerCase();
+            const rules = [
+              { label: 'area: licensing', match: /licens|activate|stripe|founder|tier/ },
+              { label: 'area: updater',   match: /update|version|releases/ },
+              { label: 'area: mining',    match: /mining|wildrig|hashrate|pool|share/ },
+              { label: 'area: voice',     match: /voice|microphone|stt|tts|whisper/ },
+              { label: 'area: vision',    match: /vision|camera|screen capture|ocr/ },
+              { label: 'area: wallet',    match: /wallet|rave|rvn|swap|address/ },
+              { label: 'area: gui',       match: /tray|dialog|gui|window|qt|pyside/ },
+              { label: 'area: install',   match: /installer|smartscreen|inno|setup\.exe/ },
+              { label: 'priority: high',  match: /crash|cannot start|wont launch|data loss|paid.+broken/ },
+            ];
+            const toAdd = rules.filter(r => r.match.test(text)).map(r => r.label);
+            if (toAdd.length) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                issue_number: context.issue.number,
+                labels: toAdd,
+              });
+            }
+
+      - name: Welcome + escalation explainer
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              `Thanks @${context.payload.issue.user.login} — this issue is now in the triage queue.`,
+              ``,
+              `**Auto-fix loop**`,
+              `1. Seraphina will read this issue on her next scheduled scan and may attempt a self-patch.`,
+              `2. If Seraphina can't resolve it, Grok will be consulted via the agent bridge.`,
+              `3. If neither agent can fix it, a maintainer escalates with \`/escalate\` and the issue is mirrored to the private source repo for Copilot Coding Agent.`,
+              ``,
+              `**Maintainer commands** (collaborators only):`,
+              `- \`/escalate\` — mirror this issue to the private source repo`,
+              `- \`/priority high\` — flag as blocker`,
+              `- \`/duplicate #N\` — close as duplicate`,
+              ``,
+              `_This is an automated message._`,
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+  # -----------------------------------------------------------------------
+  slash:
+    if: github.event_name == 'issue_comment' && !github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch slash command
+        uses: actions/github-script@v7
+        env:
+          MIRROR_PAT: ${{ secrets.MIRROR_PAT }}
+        with:
+          script: |
+            const body   = (context.payload.comment.body || '').trim();
+            const issue  = context.issue.number;
+            const auth   = context.payload.comment.author_association;
+            const allowed = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+            if (!allowed.includes(auth)) {
+              core.info(`Ignoring slash from non-collaborator (assoc=${auth})`);
+              return;
+            }
+
+            // -----------------------------------------------------------------
+            // /escalate  →  mirror to private source repo
+            // -----------------------------------------------------------------
+            if (/^\/escalate\b/i.test(body)) {
+              const pat = process.env.MIRROR_PAT;
+              if (!pat) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue,
+                  body: `⚠️ \`/escalate\` failed: \`MIRROR_PAT\` secret not configured. Add a fine-grained PAT with \`Issues: write\` on \`SynerGro-AI/seraphina-agi\` in this repo's Actions secrets.`,
+                });
+                return;
+              }
+              const { Octokit } = await import('@octokit/rest');
+              const upstream = new Octokit({ auth: pat });
+              const src      = context.payload.issue;
+              const mirror   = await upstream.rest.issues.create({
+                owner: 'SynerGro-AI',
+                repo:  'seraphina-agi',
+                title: `[mirror] ${src.title}`,
+                body:  [
+                  `Mirrored from ${src.html_url}`,
+                  `Filed by @${src.user.login}.`,
+                  ``,
+                  `---`,
+                  ``,
+                  src.body || '(no body)',
+                ].join('\n'),
+                labels: ['mirrored', 'needs-triage'],
+              });
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue, labels: ['escalated'],
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue,
+                body: `✅ Mirrored to private source repo: ${mirror.data.html_url}\n\nNext step (maintainer): assign \`@copilot\` on the mirrored issue to attempt an automated fix.`,
+              });
+              return;
+            }
+
+            const prioMatch = body.match(/^\/priority\s+(low|medium|high|critical)\b/i);
+            if (prioMatch) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue,
+                labels: [`priority: ${prioMatch[1].toLowerCase()}`],
+              });
+              return;
+            }
+
+            const dupMatch = body.match(/^\/duplicate\s+#(\d+)\b/);
+            if (dupMatch) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue, labels: ['duplicate'],
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue, state: 'closed', state_reason: 'not_planned',
+              });
+              return;
+            }

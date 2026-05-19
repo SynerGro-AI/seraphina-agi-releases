@@ -1,0 +1,38 @@
+name: ✨ Feature Request
+description: Suggest an improvement or new capability.
+title: "[feature] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that's currently hard or impossible?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - Tray / GUI
+        - Voice
+        - Vision
+        - Mining
+        - Wallet / Rave
+        - Licensing / Stripe
+        - Updater
+        - Training
+        - Security
+        - Other
+    validations:
+      required: true

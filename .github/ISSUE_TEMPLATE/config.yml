@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/SynerGro-AI/seraphina-agi-releases/discussions
+    about: Questions, ideas, or general support. File issues only for confirmed bugs or feature proposals.
+  - name: 🔒 Security vulnerability
+    url: https://github.com/SynerGro-AI/seraphina-agi-releases/security/advisories/new
+    about: Private disclosure channel. Do NOT use public issues for security problems.
