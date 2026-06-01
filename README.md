@@ -94,6 +94,12 @@ The installer takes ~5 minutes (Python + Node + Inno-bundled binaries).
 - Subscription / billing: `founders@synergroaicorp.com`
 - General: `hello@synergroaicorp.com`
 
+## Other SynerGro AI tools
+
+- 🐍 [seraphina-agi](https://pypi.org/project/seraphina-agi/) — Python engine, RWAST semantic translator, Glyph CLI
+- 🛠️ [seraphina-grok-planner](https://github.com/SynerGro-AI/seraphina-grok-planner) — Copilot LM tools (verifier, planner, repo grep)
+- 🌐 <https://synergroaicorp.com>
+
 ---
 
 ## License
