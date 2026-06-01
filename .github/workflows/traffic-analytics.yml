@@ -83,7 +83,7 @@ jobs:
           for repo in ${{ steps.repos.outputs.repos }}; do
             {
               echo "## $repo"
-              python analytics/github_traffic_analytics.py report --db analytics/traffic_analytics.db --repo "$repo" --days 14 || true
+              python analytics/github_traffic_analytics.py report --db analytics/traffic_analytics.db --repo "$repo" --days 14 || { echo "Warning: report generation failed for $repo" >&2; true; }
               echo
             } >> analytics/REPORT.md
           done
