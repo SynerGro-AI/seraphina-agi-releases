@@ -14,6 +14,9 @@ build/
 .notes/
 *.log
 *.tmp
+*.db
+__pycache__/
+*.pyc
 
 # Editor noise.
 .vscode/
