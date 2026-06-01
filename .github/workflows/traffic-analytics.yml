@@ -36,7 +36,7 @@ jobs:
           INPUT_REPOS: ${{ inputs.repos }}
         run: |
           if [ -z "$GITHUB_TOKEN" ]; then
-            echo "GH_ANALYTICS_TOKEN is required (GitHub App installation token or fine-grained PAT)."
+            echo "Secret GH_ANALYTICS_TOKEN is required (GitHub App installation token or fine-grained PAT)."
             exit 1
           fi
 
@@ -50,7 +50,7 @@ jobs:
 
       - name: Report snapshot
         run: |
-          python analytics/github_traffic_analytics.py report --db analytics/traffic_analytics.db --repo "$GITHUB_REPOSITORY" --days 14
+          python analytics/github_traffic_analytics.py report --db analytics/traffic_analytics.db --repo "${{ github.repository }}" --days 14
 
       - name: Upload DB artifact
         uses: actions/upload-artifact@v4

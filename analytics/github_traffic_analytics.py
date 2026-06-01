@@ -113,7 +113,7 @@ def github_get(url: str, token: str) -> Any:
         "Accept": "application/vnd.github+json",
         "Authorization": "Bearer " + token,
         "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "seraphina-traffic-analytics",
+        "User-Agent": "seraphina-agi-traffic-analytics",
     }
     req = urllib.request.Request(url, headers=headers)
     try:
@@ -378,7 +378,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--db",
-        default="/tmp/workspace/SynerGro-AI/seraphina-agi-releases/analytics/traffic_analytics.db",
+        default="analytics/traffic_analytics.db",
         help="Path to SQLite DB file.",
     )
 
@@ -437,7 +437,9 @@ def main() -> int:
     args = parser.parse_args()
 
     db_path = args.db
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    db_dir = os.path.dirname(db_path)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
 
     conn = sqlite3.connect(db_path)
     try:
@@ -450,7 +452,7 @@ def main() -> int:
         if args.command == "collect":
             token = os.getenv(args.token_env)
             if not token:
-                parser.error(f"Missing token: set environment variable {args.token_env}")
+                parser.error(f"Missing token: set environment variable {args.token_env}. See analytics/README.md for authentication setup.")
             for slug in args.repos:
                 owner, repo = parse_repo(slug)
                 print(f"Collecting {slug}...")
