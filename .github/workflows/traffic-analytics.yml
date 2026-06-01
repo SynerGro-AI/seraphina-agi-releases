@@ -1,0 +1,98 @@
+name: Traffic Analytics
+
+on:
+  # Daily refresh at 06:00 UTC.
+  schedule:
+    - cron: '0 6 * * *'
+  # Manual run for ad-hoc collection (with optional extra repos).
+  workflow_dispatch:
+    inputs:
+      extra_repos:
+        description: 'Optional extra repositories (space-separated owner/repo list)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r analytics/requirements.txt
+
+      - name: Discover repositories
+        id: repos
+        env:
+          GH_TOKEN: ${{ secrets.GH_ANALYTICS_TOKEN }}
+          EXTRA_REPOS: ${{ inputs.extra_repos || '' }}
+        run: |
+          set -euo pipefail
+
+          # Discover all non-archived repositories in the SynerGro-AI org.
+          discovered="$(gh api '/orgs/SynerGro-AI/repos?per_page=100&type=all' --paginate --jq '.[] | select(.archived == false) | .full_name' | tr '\n' ' ' | xargs)"
+          all_repos="$discovered"
+
+          if [ -n "$EXTRA_REPOS" ]; then
+            all_repos="$all_repos $EXTRA_REPOS"
+          fi
+
+          all_repos="$(echo "$all_repos" | xargs)"
+
+          if [ -z "$all_repos" ]; then
+            echo "No repositories discovered; exiting."
+            exit 1
+          fi
+
+          echo "repos=$all_repos" >> "$GITHUB_OUTPUT"
+
+      - name: Initialize analytics database
+        run: python analytics/github_traffic_analytics.py init-db --db analytics/traffic_analytics.db
+
+      - name: Collect analytics snapshots
+        continue-on-error: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_ANALYTICS_TOKEN }}
+        run: |
+          set -euo pipefail
+          python analytics/github_traffic_analytics.py collect --db analytics/traffic_analytics.db --repos ${{ steps.repos.outputs.repos }}
+
+      - name: Build markdown report
+        run: |
+          set -euo pipefail
+
+          # Build a single human-readable report covering all collected repos.
+          {
+            echo "# GitHub Traffic Analytics Report"
+            echo
+            echo "Generated at: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo
+          } > analytics/REPORT.md
+
+          for repo in ${{ steps.repos.outputs.repos }}; do
+            {
+              echo "## $repo"
+              python analytics/github_traffic_analytics.py report --db analytics/traffic_analytics.db --repo "$repo" --days 14 || true
+              echo
+            } >> analytics/REPORT.md
+          done
+
+      - name: Upload analytics artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: traffic-analytics-${{ github.run_id }}
+          retention-days: 90
+          path: |
+            analytics/traffic_analytics.db
+            analytics/REPORT.md

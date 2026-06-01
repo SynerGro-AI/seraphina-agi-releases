@@ -100,6 +100,12 @@ The installer takes ~5 minutes (Python + Node + Inno-bundled binaries).
 - 🛠️ [seraphina-grok-planner](https://github.com/SynerGro-AI/seraphina-grok-planner) — Copilot LM tools (verifier, planner, repo grep)
 - 🌐 <https://synergroaicorp.com>
 
+
+## Analytics
+
+- GitHub Traffic Analytics CLI usage: [analytics/README.md](analytics/README.md)
+- Organization setup and token/runbook steps: [analytics/ORG_SETUP.md](analytics/ORG_SETUP.md)
+
 ---
 
 ## License
