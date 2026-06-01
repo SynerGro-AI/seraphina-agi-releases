@@ -88,6 +88,39 @@ The installer takes ~5 minutes (Python + Node + Inno-bundled binaries).
 
 ---
 
+---
+
+## Cloud & connectivity
+
+Seraphina AGI is **local-first**. **No cloud account is required** on
+your side to install or run the app — no Azure, AWS, or GCP signup,
+no API keys to provision, nothing to configure.
+
+| Feature                          | Needs network? | Where it goes                          |
+|----------------------------------|----------------|----------------------------------------|
+| Install / first run              | No             | Fully local                            |
+| Voice control + wake-word        | No             | Local                                  |
+| Background mining (opt-in)       | Optional       | Public pool you configure              |
+| Mesh networking                  | LAN only       | Your LAN (UDP/47720), Ed25519-signed   |
+| License / entitlement check      | Yes            | `synergroaicorp.com` (only with a key) |
+| Model routing / sync / premium   | Yes            | `synergroaicorp.com` (subscribers)     |
+
+On the SynerGro AI Corp backend side, secrets (signing keys, license
+issuance material, Stripe webhooks) are managed in **Azure Key Vault**.
+You never see or handle those — they exist purely so that license
+verification and premium routing are trustworthy.
+
+---
+
+## Companion CLI / SDK (planned)
+
+A separate `pip`-installable companion (`seraphina-sdk`) is planned for
+scripting and automation against your local Seraphina runtime. It will
+ship from its own repository and is **not** required to use the
+desktop app. Watch this space.
+
+---
+
 ## Support
 
 - Bug reports: open an issue on this repo
