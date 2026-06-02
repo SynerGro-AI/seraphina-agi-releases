@@ -25,11 +25,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Initialize DB
-        run: |
-          python analytics/github_traffic_analytics.py init-db --db analytics/traffic_analytics.db
-
-      - name: Collect metrics
+      - name: Run analytics supervisor
         env:
           GITHUB_TOKEN: ${{ secrets.GH_ANALYTICS_TOKEN }}
           DEFAULT_REPO: ${{ github.repository }}
@@ -39,21 +35,12 @@ jobs:
             echo "Secret GH_ANALYTICS_TOKEN is required (GitHub App installation token or fine-grained PAT)."
             exit 1
           fi
-
-          if [ -n "$INPUT_REPOS" ]; then
-            REPOS="$INPUT_REPOS"
-          else
-            REPOS="$DEFAULT_REPO"
-          fi
-
-          python analytics/github_traffic_analytics.py collect --db analytics/traffic_analytics.db --repos $REPOS
-
-      - name: Report snapshot
-        run: |
-          python analytics/github_traffic_analytics.py report --db analytics/traffic_analytics.db --repo "${{ github.repository }}" --days 14
+          python analytics/analytics_supervisor.py --db analytics/traffic_analytics.db
 
       - name: Upload DB artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: traffic-analytics-db
           path: analytics/traffic_analytics.db
+          if-no-files-found: warn
