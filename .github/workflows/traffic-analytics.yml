@@ -1,0 +1,59 @@
+name: Traffic Analytics
+
+on:
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: "Space-separated repos (owner/repo). Leave blank for this repo only."
+        required: false
+        type: string
+  schedule:
+    - cron: "15 3 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Initialize DB
+        run: |
+          python analytics/github_traffic_analytics.py init-db --db analytics/traffic_analytics.db
+
+      - name: Collect metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_ANALYTICS_TOKEN }}
+          DEFAULT_REPO: ${{ github.repository }}
+          INPUT_REPOS: ${{ inputs.repos }}
+        run: |
+          if [ -z "$GITHUB_TOKEN" ]; then
+            echo "Secret GH_ANALYTICS_TOKEN is required (GitHub App installation token or fine-grained PAT)."
+            exit 1
+          fi
+
+          if [ -n "$INPUT_REPOS" ]; then
+            REPOS="$INPUT_REPOS"
+          else
+            REPOS="$DEFAULT_REPO"
+          fi
+
+          python analytics/github_traffic_analytics.py collect --db analytics/traffic_analytics.db --repos $REPOS
+
+      - name: Report snapshot
+        run: |
+          python analytics/github_traffic_analytics.py report --db analytics/traffic_analytics.db --repo "${{ github.repository }}" --days 14
+
+      - name: Upload DB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: traffic-analytics-db
+          path: analytics/traffic_analytics.db
