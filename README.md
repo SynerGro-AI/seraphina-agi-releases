@@ -98,6 +98,7 @@ The installer takes ~5 minutes (Python + Node + Inno-bundled binaries).
 
 - 🐍 [seraphina-agi](https://pypi.org/project/seraphina-agi/) — Python engine, RWAST semantic translator, Glyph CLI
 - 🛠️ [seraphina-grok-planner](https://github.com/SynerGro-AI/seraphina-grok-planner) — Copilot LM tools (verifier, planner, repo grep)
+- 📈 [analytics/github_traffic_analytics.py](analytics/github_traffic_analytics.py) — traffic/release analytics collector + CLI for this release repo
 - 🌐 <https://synergroaicorp.com>
 
 ---

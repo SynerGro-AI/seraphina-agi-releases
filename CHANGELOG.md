@@ -15,3 +15,4 @@ Each release entry follows:
 ## Unreleased
 
 - _Pending first public tag._
+- Added an internal GitHub traffic analytics MVP (collector CLI, normalized SQLite snapshots, scheduled workflow).
