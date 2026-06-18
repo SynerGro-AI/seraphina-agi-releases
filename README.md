@@ -2,7 +2,7 @@
 
 **Free download. Closed source. Honest pricing.**
 
-[![Latest release](https://img.shields.io/github/v/release/synergroaicorp/seraphina-agi-releases?label=download&color=blue)](https://github.com/synergroaicorp/seraphina-agi-releases/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/SynerGro-AI/seraphina-agi-releases?label=download&color=blue)](https://github.com/SynerGro-AI/seraphina-agi-releases/releases/latest)
 
 Seraphina AGI is a personal AGI runtime for Windows — voice control, local
 mining (opt-in), background automation, secure mesh networking between
@@ -12,7 +12,7 @@ your own machines. It runs entirely on your own hardware.
 
 ## Download
 
-**[⬇ Download the latest installer](https://github.com/synergroaicorp/seraphina-agi-releases/releases/latest)**
+**[⬇ Download the latest installer](https://github.com/SynerGro-AI/seraphina-agi-releases/releases/latest)**
 
 Pick `Seraphina-AGI-Setup.exe` from the **Assets** section of the latest
 release.
