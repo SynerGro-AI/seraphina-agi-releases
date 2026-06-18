@@ -1,0 +1,100 @@
+# Release asset guard for SynerGro-AI/seraphina-agi-releases.
+#
+# Why this exists:
+#   v1.8.2 went out as a "release" whose installer asset was wrong/stale.
+#   A release with no usable installer is dead revenue: customers download
+#   nothing (or the wrong thing) and can't reach the Stripe checkout tiers.
+#
+# What it does:
+#   On every release publish/edit, it checks that the release carries a
+#   real installer asset (Seraphina-AGI-Setup.exe, non-zero size). If the
+#   installer is MISSING or EMPTY it:
+#     1. Re-drafts the release (un-publishes it) so nobody can download a
+#        broken/empty release while it's flagged. Re-drafting is fully
+#        reversible: re-attach the installer, then re-publish.
+#     2. Fails the job with a red X on the release so the gap is visible.
+#   The manifest sidecar (.manifest.txt) is checked as a soft warning only.
+#
+# Note: GitHub branch/tag rulesets cannot inspect release assets, so this
+#   content-aware check has to run as a workflow. For `release` events the
+#   workflow file is always taken from the default branch (main).
+
+name: Release asset guard
+
+on:
+  release:
+    types: [published, released, edited, prereleased]
+
+permissions:
+  contents: write   # needed to re-draft a release that is missing its installer
+
+jobs:
+  require-installer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require a real installer asset
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const INSTALLER = 'Seraphina-AGI-Setup.exe';
+            const MANIFEST  = 'Seraphina-AGI-Setup.manifest.txt';
+
+            const release = context.payload.release;
+            if (!release) {
+              core.setFailed('No release in event payload.');
+              return;
+            }
+
+            const tag = release.tag_name;
+            // Pull assets fresh from the API (payload can lag on edits).
+            const { data: assets } = await github.rest.repos.listReleaseAssets({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              release_id: release.id,
+              per_page: 100,
+            });
+
+            const names = assets.map(a => `${a.name} (${a.size} bytes)`);
+            core.info(`Release ${tag} assets:\n  ${names.join('\n  ') || '(none)'}`);
+
+            const installer = assets.find(a => a.name === INSTALLER);
+            const manifest  = assets.find(a => a.name === MANIFEST);
+
+            // Soft warning: manifest missing is suspicious but not fatal.
+            if (!manifest) {
+              core.warning(`Release ${tag} has no ${MANIFEST} sidecar (hash provenance is missing).`);
+            }
+
+            const missing = !installer;
+            const empty   = installer && installer.size === 0;
+
+            if (missing || empty) {
+              const reason = missing
+                ? `is missing its installer asset (${INSTALLER})`
+                : `installer asset (${INSTALLER}) is 0 bytes`;
+
+              // Re-draft (un-publish) so the broken release isn't downloadable.
+              // Only act on a currently-public release to stay idempotent.
+              if (release.draft === false) {
+                try {
+                  await github.rest.repos.updateRelease({
+                    owner: context.repo.owner,
+                    repo:  context.repo.repo,
+                    release_id: release.id,
+                    draft: true,
+                  });
+                  core.warning(`Release ${tag} re-drafted (un-published) because it ${reason}.`);
+                } catch (e) {
+                  core.warning(`Could not re-draft ${tag}: ${e.message}`);
+                }
+              }
+
+              core.setFailed(
+                `Release ${tag} ${reason}. ` +
+                `It has been flagged and re-drafted. Attach a non-empty ${INSTALLER} ` +
+                `(build it with Build-Release.ps1), then re-publish.`
+              );
+              return;
+            }
+
+            core.info(`OK: ${tag} ships ${INSTALLER} (${installer.size} bytes).`);
